@@ -297,7 +297,7 @@ const PizzaShop = () => {
             <div className="flex items-center gap-3">
               <ShoppingBag size={20} className="text-orange-500" />
               <div>
-                <div className="text-sm font-bold">Today's Specials</div>
+                <div className="text-sm font-bold">Today&apos;s Specials</div>
                 <div className="text-xs text-gray-500">
                   Select a pizza to start your order
                 </div>

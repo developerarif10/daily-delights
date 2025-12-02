@@ -8,8 +8,15 @@ import QuantityControl from "./QuantityControl";
 
 /*
   Client component that receives initial data from the server page.
-  All interactive logic (state, validation, window.open) lives here.
+  Updated: phone input now defaults to Bangladesh country code (+880)
+  and normalizes common local input patterns on blur:
+    - "01XXXXXXXXX" -> "+8801XXXXXXXXX"
+    - "0XXXXXXXXX"  -> "+880XXXXXXXXX"
+    - "8801XXXXXXXXX" -> "+8801XXXXXXXXX"
+    - "880XXXXXXXXX"  -> "+880XXXXXXXXX"
+    - leaves "+880..." and other international formats intact
 */
+
 export default function OrderApp({ initialMenu = [], halls = [] }) {
   const MENU = initialMenu;
   const HALLS = halls.length ? halls : ["Shah Amanat Hall"];
@@ -21,7 +28,8 @@ export default function OrderApp({ initialMenu = [], halls = [] }) {
     name: "",
     hall: HALLS[0],
     room: "",
-    phone: "",
+    // default BD country code
+    phone: "+880",
     note: "",
   });
 
@@ -52,6 +60,39 @@ export default function OrderApp({ initialMenu = [], halls = [] }) {
     return trimmed.replace(/\D/g, "");
   };
 
+  const normalizeLocalBDInput = (raw) => {
+    if (!raw) return "+880";
+    let v = raw.trim();
+
+    // remove surrounding spaces
+    v = v.replace(/\s+/g, "");
+
+    // already in +880 format
+    if (v.startsWith("+880")) return v;
+
+    // starts with 880 (e.g., 8801...)
+    if (v.startsWith("880")) {
+      return "+".concat(v);
+    }
+
+    // starts with 0 (local format) -> replace leading 0 with +880
+    if (v.startsWith("0")) {
+      return "+880" + v.slice(1);
+    }
+
+    // if user just typed digits starting with 1 (without leading 0), assume they meant local and prefix +880
+    if (/^\d+$/.test(v) && v.length <= 11 && v.startsWith("1")) {
+      return "+880" + v;
+    }
+
+    // otherwise return as-is (could be another international format)
+    return v;
+  };
+
+  const handlePhoneBlur = () => {
+    setFormData((s) => ({ ...s, phone: normalizeLocalBDInput(s.phone) }));
+  };
+
   const handleOrderSubmit = (e) => {
     e.preventDefault();
 
@@ -70,7 +111,7 @@ export default function OrderApp({ initialMenu = [], halls = [] }) {
 
     setSubmitting(true);
 
-    const businessNumber = "8801XXXXXXXXX"; // << Replace with real number
+    const businessNumber = "8801685366704"; // << Replace with real number
 
     const message = [
       "*🍕 NEW PIZZA ORDER!*",
@@ -114,7 +155,7 @@ export default function OrderApp({ initialMenu = [], halls = [] }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white font-sans text-gray-900 pb-12">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white font-sans text-gray-900 pb-24">
       <header className="bg-gradient-to-r from-orange-600 to-orange-500 text-white p-5">
         <div className="max-w-xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -123,7 +164,7 @@ export default function OrderApp({ initialMenu = [], halls = [] }) {
             </div>
             <div>
               <h1 className="text-xl font-extrabold leading-tight">
-                Daily Delights Pizza
+                CU Pizza Hub
               </h1>
               <p className="text-xs opacity-90">
                 Hot pizza — campus delivery in ~20 mins
@@ -147,7 +188,7 @@ export default function OrderApp({ initialMenu = [], halls = [] }) {
             <div className="flex items-center gap-3">
               <ShoppingBag size={20} className="text-orange-500" />
               <div>
-                <div className="text-sm font-bold">Today&apos;s Specials</div>
+                <div className="text-sm font-bold">Today's Specials</div>
                 <div className="text-xs text-gray-500">
                   Select a pizza to start your order
                 </div>
@@ -254,6 +295,7 @@ export default function OrderApp({ initialMenu = [], halls = [] }) {
                   name="phone"
                   value={formData.phone}
                   onChange={(e) => updateField("phone", e.target.value)}
+                  onBlur={handlePhoneBlur}
                   placeholder="+8801XXXXXXXXX or 01XXXXXXXXX"
                   className="w-full pl-10 p-3 bg-gray-50 rounded-lg border focus:border-orange-400 outline-none"
                   inputMode="tel"
@@ -266,8 +308,8 @@ export default function OrderApp({ initialMenu = [], halls = [] }) {
                 </p>
               ) : (
                 <p className="text-xs mt-1 text-gray-400">
-                  We will confirm via WhatsApp — include country code if
-                  off-campus.
+                  Default country code is +880 (Bangladesh). We will confirm via
+                  WhatsApp.
                 </p>
               )}
             </div>
@@ -316,7 +358,10 @@ export default function OrderApp({ initialMenu = [], halls = [] }) {
             <MapPin size={12} /> Campus Delivery • <Clock size={12} /> 20 mins
             (est)
           </div>
-          <div className="mt-2">Built with care • A&J Digital</div>
+          <div className="mt-2">
+            Built with care • Replace the business number in code before going
+            live
+          </div>
         </footer>
       </main>
     </div>
