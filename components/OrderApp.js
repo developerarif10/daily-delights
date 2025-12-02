@@ -7,14 +7,13 @@ import MenuItem from "./MenuItem";
 import QuantityControl from "./QuantityControl";
 
 /*
-  Client component that receives initial data from the server page.
-  Updated: phone input now defaults to Bangladesh country code (+880)
-  and normalizes common local input patterns on blur:
-    - "01XXXXXXXXX" -> "+8801XXXXXXXXX"
-    - "0XXXXXXXXX"  -> "+880XXXXXXXXX"
-    - "8801XXXXXXXXX" -> "+8801XXXXXXXXX"
-    - "880XXXXXXXXX"  -> "+880XXXXXXXXX"
-    - leaves "+880..." and other international formats intact
+  Client component: interactive ordering UI.
+  Improvements:
+  - Centered layout with consistent max-width
+  - Translucent "glass" cards (backdrop blur + semi-transparent background)
+  - Proper spacing and alignment
+  - Form sticks visually under the selected card with consistent width
+  - Mobile-first and responsive (cards stack on small screens)
 */
 
 export default function OrderApp({ initialMenu = [], halls = [] }) {
@@ -28,8 +27,7 @@ export default function OrderApp({ initialMenu = [], halls = [] }) {
     name: "",
     hall: HALLS[0],
     room: "",
-    // default BD country code
-    phone: "+880",
+    phone: "+880", // default BD country code
     note: "",
   });
 
@@ -63,29 +61,12 @@ export default function OrderApp({ initialMenu = [], halls = [] }) {
   const normalizeLocalBDInput = (raw) => {
     if (!raw) return "+880";
     let v = raw.trim();
-
-    // remove surrounding spaces
     v = v.replace(/\s+/g, "");
-
-    // already in +880 format
     if (v.startsWith("+880")) return v;
-
-    // starts with 880 (e.g., 8801...)
-    if (v.startsWith("880")) {
-      return "+".concat(v);
-    }
-
-    // starts with 0 (local format) -> replace leading 0 with +880
-    if (v.startsWith("0")) {
-      return "+880" + v.slice(1);
-    }
-
-    // if user just typed digits starting with 1 (without leading 0), assume they meant local and prefix +880
-    if (/^\d+$/.test(v) && v.length <= 11 && v.startsWith("1")) {
+    if (v.startsWith("880")) return "+" + v;
+    if (v.startsWith("0")) return "+880" + v.slice(1);
+    if (/^\d+$/.test(v) && v.length <= 11 && v.startsWith("1"))
       return "+880" + v;
-    }
-
-    // otherwise return as-is (could be another international format)
     return v;
   };
 
@@ -132,11 +113,9 @@ export default function OrderApp({ initialMenu = [], halls = [] }) {
 
     let waUrl = "";
     if (businessNumber.includes("X")) {
-      // Developer placeholder: open web.whatsapp.com with message typed
       waUrl = `https://web.whatsapp.com/send?text=${encodeURIComponent(
         message
       )}`;
-
       console.warn(
         "Replace businessNumber with the real international phone (no placeholders)."
       );
@@ -147,223 +126,250 @@ export default function OrderApp({ initialMenu = [], halls = [] }) {
       )}`;
     }
 
-    // Open WhatsApp in a new tab/window
     window.open(waUrl, "_blank");
-
-    // Small delay to let the new tab open, then reset submitting state
     setTimeout(() => setSubmitting(false), 400);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white font-sans text-gray-900 pb-24">
-      <header className="bg-gradient-to-r from-orange-600 to-orange-500 text-white p-5">
-        <div className="max-w-xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center text-2xl font-extrabold shadow">
-              🍕
+    <div className="w-full max-w-3xl mx-auto">
+      {/* Top header card (glass) */}
+      <header className="relative -mt-3 z-10">
+        <div className="mx-auto max-w-3xl">
+          <div className="backdrop-blur-md bg-orange-600/85 text-white rounded-2xl px-4 py-4 shadow-xl flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-white/20 p-2 shadow-inner">
+                <span className="text-xl">🍕</span>
+              </div>
+              <div>
+                <div className="text-lg font-bold leading-tight">
+                  Daily Delights Pizza
+                </div>
+                <div className="text-xs opacity-90">
+                  Hot pizza — campus delivery in ~20 mins
+                </div>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl font-extrabold leading-tight">
-                Daily Delights Pizza
-              </h1>
-              <p className="text-xs opacity-90">
-                Hot pizza — campus delivery in ~20 mins
-              </p>
-            </div>
-          </div>
-          <div className="hidden sm:flex items-center gap-3 text-sm bg-white/10 px-3 py-1 rounded-md">
-            <div className="flex items-center gap-2">
-              <Clock size={14} /> 4PM - 11PM
-            </div>
-            <div className="flex items-center gap-2">
-              <MapPin size={14} /> Campus Wide
+
+            <div className="hidden sm:flex items-center gap-4 text-sm">
+              <div className="inline-flex items-center gap-2 bg-white/10 px-3 py-1 rounded-lg">
+                <Clock size={14} /> 4PM - 11PM
+              </div>
+              <div className="inline-flex items-center gap-2 bg-white/10 px-3 py-1 rounded-lg">
+                <MapPin size={14} /> Campus Wide
+              </div>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-xl mx-auto px-4 -mt-6">
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-6">
+      {/* Small spacer */}
+      <div className="h-6" />
+
+      {/* Main content: menu list */}
+      <section className="space-y-4">
+        <div className="backdrop-blur-sm bg-white/60 border border-white/30 rounded-xl px-4 py-3 shadow">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <ShoppingBag size={20} className="text-orange-500" />
+              <ShoppingBag size={18} className="text-orange-600" />
               <div>
-                <div className="text-sm font-bold">Today&apos;s Specials</div>
-                <div className="text-xs text-gray-500">
+                <div className="text-sm font-semibold">
+                  Today&apos;s Specials
+                </div>
+                <div className="text-xs text-gray-600">
                   Select a pizza to start your order
                 </div>
               </div>
             </div>
-            <div className="text-xs text-gray-400">Secure & Contactless</div>
+            <div className="text-xs text-gray-500">Secure & Contactless</div>
           </div>
         </div>
 
-        {/* MENU */}
-        <section className="grid gap-3 mb-6">
+        {/* Menu items: each is a semi-transparent card */}
+        <div className="space-y-3">
           {MENU.map((p) => (
-            <MenuItem
-              key={p.id}
-              pizza={p}
-              selected={selectedPizza?.id === p.id}
-              onSelect={(pizza) => {
-                setSelectedPizza(pizza);
-                setQuantity(1);
-              }}
-            />
+            <div key={p.id} className="relative">
+              <div
+                className={`backdrop-blur-sm transition-all rounded-xl p-3 border border-white/30 shadow-sm
+                  ${
+                    selectedPizza?.id === p.id
+                      ? "bg-white/70 shadow-lg ring-2 ring-orange-200"
+                      : "bg-white/50 hover:shadow-md hover:scale-[1.01]"
+                  }`}
+              >
+                <MenuItem
+                  pizza={p}
+                  selected={selectedPizza?.id === p.id}
+                  onSelect={(pizza) => {
+                    setSelectedPizza(pizza);
+                    setQuantity(1);
+                    // scroll form into view on select (mobile friendly)
+                    const form = document.getElementById("order-form");
+                    if (form)
+                      form.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center",
+                      });
+                  }}
+                />
+              </div>
+            </div>
           ))}
-        </section>
+        </div>
 
-        {/* ORDER FORM */}
-        <form
-          onSubmit={handleOrderSubmit}
-          className="bg-white rounded-2xl p-5 shadow-lg border border-gray-100"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-lg font-bold">{selectedPizza?.name}</h2>
-              <p className="text-xs text-gray-500">{selectedPizza?.desc}</p>
-            </div>
-            <div className="text-right">
-              <div className="text-sm font-bold text-gray-800">{total}৳</div>
-              <div className="text-xs text-gray-400">Est. total</div>
-            </div>
-          </div>
-
-          <div className="mb-4 flex items-center justify-between">
-            <div className="text-sm text-gray-600">Quantity</div>
-            <QuantityControl value={quantity} onChange={setQuantity} />
-          </div>
-
-          <div className="space-y-3">
-            <div>
-              <label className="text-xs font-semibold text-gray-500">
-                Your name
-              </label>
-              <input
-                name="name"
-                value={formData.name}
-                onChange={(e) => updateField("name", e.target.value)}
-                placeholder="Rahim Uddin"
-                className="w-full mt-1 p-3 bg-gray-50 rounded-lg border focus:border-orange-400 outline-none"
-                autoComplete="name"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
+        {/* Order form card */}
+        <div id="order-form" className="mt-4">
+          <form
+            onSubmit={handleOrderSubmit}
+            className="backdrop-blur-md bg-white/70 border border-white/30 rounded-2xl p-6 shadow-xl"
+          >
+            <div className="flex items-start justify-between gap-4">
               <div>
-                <label className="text-xs font-semibold text-gray-500">
-                  Hall / Location
-                </label>
-                <select
-                  name="hall"
-                  value={formData.hall}
-                  onChange={(e) => updateField("hall", e.target.value)}
-                  className="w-full mt-1 p-3 bg-gray-50 rounded-lg border focus:border-orange-400 outline-none"
-                >
-                  {HALLS.map((h) => (
-                    <option key={h} value={h}>
-                      {h}
-                    </option>
-                  ))}
-                </select>
+                <h3 className="text-lg font-bold">{selectedPizza?.name}</h3>
+                <p className="text-xs text-gray-600">{selectedPizza?.desc}</p>
               </div>
+              <div className="text-right">
+                <div className="text-sm font-bold text-gray-800">{total}৳</div>
+                <div className="text-xs text-gray-400">Est. total</div>
+              </div>
+            </div>
 
+            <div className="mt-4 flex items-center justify-between">
+              <div className="text-sm text-gray-700">Quantity</div>
+              <QuantityControl value={quantity} onChange={setQuantity} />
+            </div>
+
+            <div className="mt-6 grid gap-3">
               <div>
-                <label className="text-xs font-semibold text-gray-500">
-                  Room / Gate
+                <label className="text-xs font-semibold text-gray-600">
+                  Your name
                 </label>
                 <input
-                  name="room"
-                  value={formData.room}
-                  onChange={(e) => updateField("room", e.target.value)}
-                  placeholder="Ex: 304"
-                  className="w-full mt-1 p-3 bg-gray-50 rounded-lg border focus:border-orange-400 outline-none"
+                  name="name"
+                  value={formData.name}
+                  onChange={(e) => updateField("name", e.target.value)}
+                  placeholder="Rahim Uddin"
+                  className="w-full mt-1 p-3 bg-white/60 border border-gray-200 rounded-lg focus:ring-1 focus:ring-orange-300 outline-none"
+                  autoComplete="name"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-gray-600">
+                    Hall / Location
+                  </label>
+                  <select
+                    name="hall"
+                    value={formData.hall}
+                    onChange={(e) => updateField("hall", e.target.value)}
+                    className="w-full mt-1 p-3 bg-white/60 border border-gray-200 rounded-lg focus:ring-1 focus:ring-orange-300 outline-none"
+                  >
+                    {HALLS.map((h) => (
+                      <option key={h} value={h}>
+                        {h}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-gray-600">
+                    Room / Gate
+                  </label>
+                  <input
+                    name="room"
+                    value={formData.room}
+                    onChange={(e) => updateField("room", e.target.value)}
+                    placeholder="Ex: 304"
+                    className="w-full mt-1 p-3 bg-white/60 border border-gray-200 rounded-lg focus:ring-1 focus:ring-orange-300 outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-gray-600">
+                  Phone number
+                </label>
+                <div className="relative mt-1">
+                  <Phone
+                    size={16}
+                    className="absolute left-3 top-3 text-gray-400"
+                  />
+                  <input
+                    name="phone"
+                    value={formData.phone}
+                    onChange={(e) => updateField("phone", e.target.value)}
+                    onBlur={handlePhoneBlur}
+                    placeholder="+8801XXXXXXXXX or 01XXXXXXXXX"
+                    className="w-full pl-10 p-3 bg-white/60 border border-gray-200 rounded-lg focus:ring-1 focus:ring-orange-300 outline-none"
+                    inputMode="tel"
+                    aria-invalid={!!phoneError}
+                  />
+                </div>
+                {phoneError ? (
+                  <p className="text-xs mt-1 text-red-500 flex items-center gap-2">
+                    <XCircle size={14} />
+                    {phoneError}
+                  </p>
+                ) : (
+                  <p className="text-xs mt-1 text-gray-500">
+                    Default country code is{" "}
+                    <span className="font-semibold">+880</span> (Bangladesh). We
+                    will confirm via WhatsApp.
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-gray-600">
+                  Extra note
+                </label>
+                <textarea
+                  name="note"
+                  value={formData.note}
+                  onChange={(e) => updateField("note", e.target.value)}
+                  placeholder="Ex: Extra spicy, call when you reach gate..."
+                  className="w-full mt-1 p-3 bg-white/60 border border-gray-200 rounded-lg focus:ring-1 focus:ring-orange-300 outline-none h-24 resize-none"
                 />
               </div>
             </div>
 
-            <div>
-              <label className="text-xs font-semibold text-gray-500">
-                Phone number
-              </label>
-              <div className="relative mt-1">
-                <Phone
-                  size={16}
-                  className="absolute left-3 top-3 text-gray-400"
-                />
-                <input
-                  name="phone"
-                  value={formData.phone}
-                  onChange={(e) => updateField("phone", e.target.value)}
-                  onBlur={handlePhoneBlur}
-                  placeholder="+8801XXXXXXXXX or 01XXXXXXXXX"
-                  className="w-full pl-10 p-3 bg-gray-50 rounded-lg border focus:border-orange-400 outline-none"
-                  inputMode="tel"
-                  aria-invalid={!!phoneError}
-                />
-              </div>
-              {phoneError ? (
-                <p className="text-xs mt-1 text-red-500 flex items-center gap-2">
-                  <XCircle size={14} /> {phoneError}
-                </p>
-              ) : (
-                <p className="text-xs mt-1 text-gray-400">
-                  Default country code is +880 (Bangladesh). We will confirm via
-                  WhatsApp.
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold text-gray-500">
-                Extra note
-              </label>
-              <textarea
-                name="note"
-                value={formData.note}
-                onChange={(e) => updateField("note", e.target.value)}
-                placeholder="Ex: Extra spicy, call when you reach gate..."
-                className="w-full mt-1 p-3 bg-gray-50 rounded-lg border focus:border-orange-400 outline-none h-20 resize-none"
-              />
-            </div>
-          </div>
-
-          <div className="mt-5">
-            <button
-              type="submit"
-              disabled={
-                !formData.name.trim() || !formData.phone.trim() || submitting
-              }
-              className={`w-full inline-flex justify-center items-center gap-2 py-3 rounded-xl font-bold text-white transition transform active:scale-95
-                ${
+            <div className="mt-6">
+              <button
+                type="submit"
+                disabled={
                   !formData.name.trim() || !formData.phone.trim() || submitting
-                    ? "bg-green-300 cursor-not-allowed"
-                    : "bg-green-600 hover:bg-green-700"
-                }`}
-            >
-              <Send size={18} />
-              {submitting ? "Opening WhatsApp..." : "Order via WhatsApp"}
-            </button>
+                }
+                className={`w-full inline-flex justify-center items-center gap-2 py-3 rounded-xl font-bold text-white transition transform active:scale-95
+                  ${
+                    !formData.name.trim() ||
+                    !formData.phone.trim() ||
+                    submitting
+                      ? "bg-green-300 cursor-not-allowed"
+                      : "bg-green-600 hover:bg-green-700"
+                  }`}
+              >
+                <Send size={18} />{" "}
+                {submitting ? "Opening WhatsApp..." : "Order via WhatsApp"}
+              </button>
 
-            <div className="mt-3 text-center text-xs text-gray-500">
-              Total:{" "}
-              <span className="font-semibold text-gray-800">{total}৳</span> •
-              Confirm on WhatsApp
+              <div className="mt-3 text-center text-xs text-gray-600">
+                Total:{" "}
+                <span className="font-semibold text-gray-800">{total}৳</span> •
+                Confirm on WhatsApp
+              </div>
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
 
-        <footer className="mt-6 mb-10 text-center text-xs text-gray-400">
+        <footer className="mt-8 text-center text-xs text-gray-500">
           <div className="flex items-center justify-center gap-2">
             <MapPin size={12} /> Campus Delivery • <Clock size={12} /> 20 mins
             (est)
           </div>
-          <div className="mt-2">
-            Built with care • Replace the business number in code before going
-            live
-          </div>
+          <div className="mt-2">Built with care • A&J Digital</div>
         </footer>
-      </main>
+      </section>
     </div>
   );
 }

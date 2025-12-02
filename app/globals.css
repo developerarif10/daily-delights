@@ -1,1 +1,35 @@
 @import "tailwindcss";
+
+/* Custom glass utilities and helpers */
+:root {
+  --glass-border: rgba(255, 255, 255, 0.45);
+  --glass-bg: rgba(255, 255, 255, 0.68);
+}
+
+html,
+body,
+#__next {
+  height: 100%;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Slight elevation shadow for most cards */
+.shadow-xl {
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+/* Small helper to ensure images cover nicely */
+img.object-cover {
+  object-fit: cover;
+}
+
+/* Reduce line-clamp fallback spacing on small screens */
+@media (max-width: 640px) {
+  .line-clamp-2 {
+    -webkit-line-clamp: 2;
+  }
+}

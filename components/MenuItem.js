@@ -2,41 +2,40 @@ import { CheckCircle, ChevronRight } from "lucide-react";
 import ImageWithFallback from "./ImageWithFallback";
 import PriceBadge from "./PriceBadge";
 
-const TagPill = ({ children }) => (
-  <span className="inline-block text-xs font-semibold text-white bg-orange-500 px-2 py-0.5 rounded">
-    {children}
-  </span>
-);
-
-const MenuItem = ({ pizza, selected, onSelect }) => {
+/*
+  Updated MenuItem with tighter alignment and improved visual balance.
+  The component itself is stateless and receives selected/onSelect props.
+*/
+export default function MenuItem({ pizza, selected, onSelect }) {
   return (
     <button
       type="button"
       onClick={() => onSelect(pizza)}
-      className={`group w-full text-left p-3 rounded-xl flex items-center gap-3 transition-shadow border
-        ${
-          selected
-            ? "border-orange-300 shadow-lg bg-gradient-to-tr from-white to-orange-50"
-            : "border-transparent bg-white hover:shadow-md"
-        }`}
+      className="w-full text-left flex items-center gap-4 p-2"
       aria-pressed={selected}
     >
-      <div className="w-20 h-20 flex-shrink-0">
-        <ImageWithFallback images={pizza.images} className="rounded-lg" />
+      <div className="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden shadow-sm">
+        <ImageWithFallback
+          images={pizza.images}
+          className="w-full h-full object-cover"
+        />
       </div>
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between gap-2">
-          <h3 className="text-sm font-bold text-gray-800 truncate">
+        <div className="flex items-center justify-between gap-3">
+          <h3 className="text-sm font-semibold text-gray-800 truncate">
             {pizza.name}
           </h3>
-          <div className="flex items-center gap-2">
-            <PriceBadge>{pizza.price}৳</PriceBadge>
-          </div>
+          <PriceBadge>{pizza.price}৳</PriceBadge>
         </div>
-        <p className="text-xs text-gray-500 mt-1 line-clamp-2">{pizza.desc}</p>
-        <div className="mt-2">
-          {pizza.tag && <TagPill>{pizza.tag}</TagPill>}
+        <p className="text-xs text-gray-600 mt-1 line-clamp-2">{pizza.desc}</p>
+
+        <div className="mt-3 flex items-center gap-2">
+          {pizza.tag && (
+            <span className="inline-block text-xs font-semibold text-white bg-orange-500 px-2 py-0.5 rounded">
+              {pizza.tag}
+            </span>
+          )}
         </div>
       </div>
 
@@ -49,6 +48,4 @@ const MenuItem = ({ pizza, selected, onSelect }) => {
       </div>
     </button>
   );
-};
-
-export default MenuItem;
+}

@@ -55,7 +55,15 @@ export default function Layout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        {/* Decorative background */}
+        <div className="fixed inset-0 -z-10 bg-gradient-to-b from-[#fff7f3] via-white to-white">
+          <div className="absolute -top-48 -left-20 w-[520px] h-[520px] bg-orange-500 opacity-10 rounded-full blur-3xl"></div>
+          <div className="absolute -bottom-56 -right-24 w-[600px] h-[600px] bg-green-200 opacity-6 rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="min-h-screen flex flex-col items-center">
+          {children}
+        </div>
       </body>
     </html>
   );
