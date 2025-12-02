@@ -17,12 +17,12 @@ const geistMono = Geist_Mono({
 */
 
 // REPLACE 'https://your-pizza-site.vercel.app' WITH YOUR ACTUAL DOMAIN
-const baseUrl = "https://your-pizza-site.vercel.app";
+const baseUrl = "https://dailydelights.vercel.app";
 
 export const metadata = {
   title: "Daily Delights Hub 🍕 | Hot Delivery to Your Hall",
   description:
-    "Hungry? Order hot, cheesy pizza delivered directly to Shah Amanat, Shamsun Nahar, or any CU Hall gate in 20 mins. Order via WhatsApp!",
+    "Hungry? Order hot, cheesy pizza delivered directly to Daily Delights Halls in 20 mins. Order via WhatsApp!",
   metadataBase: new URL(baseUrl),
   openGraph: {
     title: "Daily Delights Hub 🍕 | Hot Delivery to Your Hall",
@@ -32,7 +32,7 @@ export const metadata = {
     siteName: "Daily Delights Hub",
     images: [
       {
-        url: "/images/daily-delights-hub-og-image.png", // Must be in your public folder
+        url: `${baseUrl}/images/daily-delights-hub-og-image.png`, // Must be in your public folder
         width: 1200,
         height: 630,
         alt: "Daily Delights Hub - Hot Delivery to Your Hall",
@@ -45,7 +45,7 @@ export const metadata = {
     card: "summary_large_image",
     title: "Daily Delights Hub 🍕",
     description: "Hot pizza delivered to Daily Delights Halls in 20 mins.",
-    images: ["/images/daily-delights-hub-og-image.jpg"], // Must be in public folder
+    images: [`${baseUrl}/images/daily-delights-hub-og-image.png`], // Must be in public folder
   },
 };
 

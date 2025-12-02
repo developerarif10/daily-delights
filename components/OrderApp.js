@@ -164,7 +164,7 @@ export default function OrderApp({ initialMenu = [], halls = [] }) {
             </div>
             <div>
               <h1 className="text-xl font-extrabold leading-tight">
-                CU Pizza Hub
+                Daily Delights Pizza
               </h1>
               <p className="text-xs opacity-90">
                 Hot pizza — campus delivery in ~20 mins
@@ -188,7 +188,7 @@ export default function OrderApp({ initialMenu = [], halls = [] }) {
             <div className="flex items-center gap-3">
               <ShoppingBag size={20} className="text-orange-500" />
               <div>
-                <div className="text-sm font-bold">Today's Specials</div>
+                <div className="text-sm font-bold">Today&apos;s Specials</div>
                 <div className="text-xs text-gray-500">
                   Select a pizza to start your order
                 </div>
